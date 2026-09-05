@@ -1,0 +1,17 @@
+{
+  "name": "com.seikasan.clean-foundation",
+  "version": "1.0.0",
+  "displayName": "Clean Foundation",
+  "description": "A lightweight foundation for Clean Architecture in Unity, with math, geometry, and unit-safe value types.",
+  "unity": "6000.0",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "keywords": [
+    "Clean Architecture"
+  ],
+  "author": {
+    "name": "seika",
+    "url": "https://github.com/seikasan"
+  }
+}
