@@ -15,3 +15,15 @@ Unityでクリーンアーキテクチャに基づいた設計をしていると
 ```
 https://github.com/seikasan/CleanFoundation.git?path=Assets/Scripts/CleanFoundation
 ```
+
+## 使用方法
+
+```csharp
+using CleanFoundation;
+using CleanFoundation.Diagnostics;
+using CleanFoundation.Geometry;
+using CleanFoundation.Units;
+using Debug = CleanFoundation.Diagnostics.Debug;
+```
+
+とすればよいでしょう。
