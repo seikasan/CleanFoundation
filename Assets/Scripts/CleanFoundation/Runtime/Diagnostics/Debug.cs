@@ -1,105 +1,127 @@
 using System;
 using System.Diagnostics;
-using UnityEngine;
+
+#if UNITY_5_3_OR_NEWER
 using UObject = UnityEngine.Object;
+#endif
 
 namespace CleanFoundation.Diagnostics
 {
     /// <summary>
-    /// UnityEngine.Debug の薄い Facade。
-    /// Domain / Application から UnityEngine.Debug を直接参照せず、
-    /// Unity と同じ Debug.Log(...) の書き味を維持する。
+    /// Unity では UnityEngine.Debug、非 Unity 環境では Console を使用する Debug facade。
     /// </summary>
     public static class Debug
     {
-        /// <summary>
-        /// 通常ログを出力する。
-        /// UNITY_EDITOR / DEVELOPMENT_BUILD 以外では呼び出し自体が除去される。
-        /// </summary>
-        [HideInCallstack]
         [Conditional("UNITY_EDITOR")]
         [Conditional("DEVELOPMENT_BUILD")]
         public static void Log(object message)
-            => UnityEngine.Debug.Log(message);
+            => LogCore(message);
 
-        /// <summary>
-        /// 通常ログを出力する。
-        /// source はログ発生元の表示、および UnityEngine.Object の場合は
-        /// Console の context として使用する。
-        /// UNITY_EDITOR / DEVELOPMENT_BUILD 以外では呼び出し自体が除去される。
-        /// </summary>
-        [HideInCallstack]
         [Conditional("UNITY_EDITOR")]
         [Conditional("DEVELOPMENT_BUILD")]
         public static void Log(object message, object source)
-        {
-            UnityEngine.Debug.Log(
-                FormatMessage(message, source),
-                GetUnityContext(source));
-        }
+            => LogCore(message, source);
 
-        /// <summary>
-        /// 警告ログを出力する。
-        /// UNITY_EDITOR / DEVELOPMENT_BUILD 以外では呼び出し自体が除去される。
-        /// </summary>
-        [HideInCallstack]
         [Conditional("UNITY_EDITOR")]
         [Conditional("DEVELOPMENT_BUILD")]
         public static void LogWarning(object message)
-            => UnityEngine.Debug.LogWarning(message);
+            => LogWarningCore(message);
 
-        /// <summary>
-        /// 警告ログを出力する。
-        /// source はログ発生元の表示、および UnityEngine.Object の場合は
-        /// Console の context として使用する。
-        /// UNITY_EDITOR / DEVELOPMENT_BUILD 以外では呼び出し自体が除去される。
-        /// </summary>
-        [HideInCallstack]
         [Conditional("UNITY_EDITOR")]
         [Conditional("DEVELOPMENT_BUILD")]
         public static void LogWarning(object message, object source)
+            => LogWarningCore(message, source);
+
+        public static void LogError(object message)
+            => LogErrorCore(message);
+
+        public static void LogError(object message, object source)
+            => LogErrorCore(message, source);
+
+        public static void LogException(Exception exception)
+            => LogExceptionCore(exception);
+
+        public static void LogException(Exception exception, object source)
+            => LogExceptionCore(exception, source);
+
+        [Conditional("UNITY_EDITOR")]
+        [Conditional("DEVELOPMENT_BUILD")]
+        public static void Assert(bool condition)
+            => AssertCore(condition);
+
+        [Conditional("UNITY_EDITOR")]
+        [Conditional("DEVELOPMENT_BUILD")]
+        public static void Assert(bool condition, object message)
+            => AssertCore(condition, message);
+
+        [Conditional("UNITY_EDITOR")]
+        [Conditional("DEVELOPMENT_BUILD")]
+        public static void Assert(bool condition, object message, object source)
+            => AssertCore(condition, message, source);
+
+        private static string FormatMessage(object message, object source)
+            => $"{GetPrefix(source)} {message}";
+
+        private static string GetPrefix(object source)
         {
-            UnityEngine.Debug.LogWarning(
-                FormatMessage(message, source),
-                GetUnityContext(source));
+            if (source is null)
+            {
+                return "[null]";
+            }
+
+#if UNITY_5_3_OR_NEWER
+            if (source is UObject unityObject)
+            {
+                // UnityEngine.Object は CLR null とは別に、破棄済みオブジェクトを
+                // operator == で null とみなすため、先に判定する。
+                if (unityObject == null)
+                {
+                    return "[destroyed]";
+                }
+
+                if (unityObject is UnityEngine.Component component)
+                {
+                    return $"[{component.gameObject.name}/{component.GetType().Name}]";
+                }
+
+                if (unityObject is UnityEngine.GameObject gameObject)
+                {
+                    return $"[{gameObject.name}/GameObject]";
+                }
+
+                return $"[{unityObject.name}/{unityObject.GetType().Name}]";
+            }
+#endif
+
+            return $"[{source.GetType().Name}]";
         }
 
-        /// <summary>
-        /// エラーログを出力する。
-        /// リリースビルドでも残る。
-        /// </summary>
-        [HideInCallstack]
-        public static void LogError(object message)
+#if UNITY_5_3_OR_NEWER
+        private static UObject GetUnityContext(object source)
+            => source as UObject;
+
+        private static void LogCore(object message)
+            => UnityEngine.Debug.Log(message);
+
+        private static void LogCore(object message, object source)
+            => UnityEngine.Debug.Log(FormatMessage(message, source), GetUnityContext(source));
+
+        private static void LogWarningCore(object message)
+            => UnityEngine.Debug.LogWarning(message);
+
+        private static void LogWarningCore(object message, object source)
+            => UnityEngine.Debug.LogWarning(FormatMessage(message, source), GetUnityContext(source));
+
+        private static void LogErrorCore(object message)
             => UnityEngine.Debug.LogError(message);
 
-        /// <summary>
-        /// エラーログを出力する。
-        /// source はログ発生元の表示、および UnityEngine.Object の場合は
-        /// Console の context として使用する。
-        /// リリースビルドでも残る。
-        /// </summary>
-        [HideInCallstack]
-        public static void LogError(object message, object source)
-        {
-            UnityEngine.Debug.LogError(
-                FormatMessage(message, source),
-                GetUnityContext(source));
-        }
+        private static void LogErrorCore(object message, object source)
+            => UnityEngine.Debug.LogError(FormatMessage(message, source), GetUnityContext(source));
 
-        /// <summary>
-        /// 例外を出力する。
-        /// 例外は障害解析に必要なためリリースビルドでも残る。
-        /// </summary>
-        [HideInCallstack]
-        public static void LogException(Exception exception)
+        private static void LogExceptionCore(Exception exception)
             => UnityEngine.Debug.LogException(exception);
 
-        /// <summary>
-        /// 例外を出力する。
-        /// source が UnityEngine.Object の場合は Console の context として使用する。
-        /// </summary>
-        [HideInCallstack]
-        public static void LogException(Exception exception, object source)
+        private static void LogExceptionCore(Exception exception, object source)
         {
             UObject context = GetUnityContext(source);
 
@@ -109,47 +131,22 @@ namespace CleanFoundation.Diagnostics
                 return;
             }
 
-            // Domain object 等は Unity の context にできないため、
-            // 発生元を別ログとして付与してから例外を出す。
             UnityEngine.Debug.LogError($"{GetPrefix(source)} Exception thrown.");
-
             UnityEngine.Debug.LogException(exception);
         }
 
-        /// <summary>
-        /// 条件が false の場合に Assertion を出力する。
-        /// UNITY_EDITOR / DEVELOPMENT_BUILD 以外では呼び出し自体が除去される。
-        /// </summary>
-        [HideInCallstack]
-        [Conditional("UNITY_EDITOR")]
-        [Conditional("DEVELOPMENT_BUILD")]
-        public static void Assert(bool condition)
+        private static void AssertCore(bool condition)
             => UnityEngine.Debug.Assert(condition);
 
-        /// <summary>
-        /// 条件が false の場合に Assertion を出力する。
-        /// UNITY_EDITOR / DEVELOPMENT_BUILD 以外では呼び出し自体が除去される。
-        /// </summary>
-        [HideInCallstack]
-        [Conditional("UNITY_EDITOR")]
-        [Conditional("DEVELOPMENT_BUILD")]
-        public static void Assert(bool condition, object message)
+        private static void AssertCore(bool condition, object message)
             => UnityEngine.Debug.Assert(condition, message);
 
-        /// <summary>
-        /// 条件が false の場合に Assertion を出力する。
-        /// source の情報をメッセージに付与する。
-        /// UNITY_EDITOR / DEVELOPMENT_BUILD 以外では呼び出し自体が除去される。
-        /// </summary>
-        [HideInCallstack]
-        [Conditional("UNITY_EDITOR")]
-        [Conditional("DEVELOPMENT_BUILD")]
-        public static void Assert(
-            bool condition,
-            object message,
-            object source)
+        private static void AssertCore(bool condition, object message, object source)
         {
-            if (condition) return;
+            if (condition)
+            {
+                return;
+            }
 
             UObject context = GetUnityContext(source);
             string text = FormatMessage(message, source);
@@ -162,44 +159,57 @@ namespace CleanFoundation.Diagnostics
 
             UnityEngine.Debug.Assert(false, text);
         }
+#else
+        private static void LogCore(object message)
+            => Console.WriteLine(message);
 
-        private static string FormatMessage(object message, object source)
-            => $"{GetPrefix(source)} {message}";
+        private static void LogCore(object message, object source)
+            => Console.WriteLine(FormatMessage(message, source));
 
-        private static UObject GetUnityContext(object source)
-            => source as UObject;
+        private static void LogWarningCore(object message)
+            => Console.WriteLine($"Warning: {message}");
 
-        private static string GetPrefix(object source)
+        private static void LogWarningCore(object message, object source)
+            => Console.WriteLine($"Warning: {FormatMessage(message, source)}");
+
+        private static void LogErrorCore(object message)
+            => Console.Error.WriteLine(message);
+
+        private static void LogErrorCore(object message, object source)
+            => Console.Error.WriteLine(FormatMessage(message, source));
+
+        private static void LogExceptionCore(Exception exception)
+            => Console.Error.WriteLine(exception);
+
+        private static void LogExceptionCore(Exception exception, object source)
         {
-            // CLR null。
-            // UnityEngine.Object の「破棄済み == null」とは区別する。
-            if (source is null)
-            {
-                return "[null]";
-            }
-
-            if (source is UObject unityObject)
-            {
-                // UnityEngine.Object の特殊 null 判定。
-                if (unityObject == null)
-                {
-                    return "[destroyed]";
-                }
-
-                if (unityObject is Component component)
-                {
-                    return $"[{component.gameObject.name}/{component.GetType().Name}]";
-                }
-
-                if (unityObject is GameObject gameObject)
-                {
-                    return $"[{gameObject.name}/GameObject]";
-                }
-
-                return $"[{unityObject.name}/{unityObject.GetType().Name}]";
-            }
-
-            return $"[{source.GetType().Name}]";
+            Console.Error.WriteLine($"{GetPrefix(source)} Exception thrown.");
+            Console.Error.WriteLine(exception);
         }
+
+        private static void AssertCore(bool condition)
+        {
+            if (!condition)
+            {
+                Console.Error.WriteLine("Assertion failed.");
+            }
+        }
+
+        private static void AssertCore(bool condition, object message)
+        {
+            if (!condition)
+            {
+                Console.Error.WriteLine($"Assertion failed: {message}");
+            }
+        }
+
+        private static void AssertCore(bool condition, object message, object source)
+        {
+            if (!condition)
+            {
+                Console.Error.WriteLine($"Assertion failed: {FormatMessage(message, source)}");
+            }
+        }
+#endif
     }
 }

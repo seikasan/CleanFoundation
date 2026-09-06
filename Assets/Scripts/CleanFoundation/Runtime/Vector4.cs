@@ -1,359 +1,80 @@
 using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
-using UVector2 = UnityEngine.Vector2;
-using UVector3 = UnityEngine.Vector3;
-using UVector4 = UnityEngine.Vector4;
 
 namespace CleanFoundation
 {
-    /// <summary>
-    /// UnityEngine.Vector4 の薄い Facade。
-    /// 公開面は Unity の Vector4 に近づけ、計算処理は UnityEngine.Vector4 に委譲する。
-    /// </summary>
     [Serializable]
     public partial struct Vector4 : IEquatable<Vector4>, IFormattable
     {
-        public float x;
-        public float y;
-        public float z;
-        public float w;
-
-        public const float kEpsilon = UVector4.kEpsilon;
-
+        public float x, y, z, w;
+        public const float kEpsilon = 1E-05f;
         public float this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            readonly get => ((UVector4)this)[index];
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                switch (index)
-                {
-                    case 0:
-                        x = value;
-                        break;
-                    case 1:
-                        y = value;
-                        break;
-                    case 2:
-                        z = value;
-                        break;
-                    case 3:
-                        w = value;
-                        break;
-                    default:
-                        throw new IndexOutOfRangeException("Invalid Vector4 index!");
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] readonly get { switch (index) { case 0:return x; case 1:return y; case 2:return z; case 3:return w; default: throw new IndexOutOfRangeException("Invalid Vector4 index!"); } }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] set { switch (index) { case 0:x=value;break; case 1:y=value;break; case 2:z=value;break; case 3:w=value;break; default: throw new IndexOutOfRangeException("Invalid Vector4 index!"); } }
         }
-
-        public readonly Vector4 normalized
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UVector4.Normalize((UVector4)this);
-        }
-
-        public readonly float magnitude
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ((UVector4)this).magnitude;
-        }
-
-        public readonly float sqrMagnitude
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ((UVector4)this).sqrMagnitude;
-        }
-
-        public static Vector4 zero
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UVector4.zero;
-        }
-
-        public static Vector4 one
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UVector4.one;
-        }
-
-        public static Vector4 positiveInfinity
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UVector4.positiveInfinity;
-        }
-
-        public static Vector4 negativeInfinity
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UVector4.negativeInfinity;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector4(float x, float y, float z, float w)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.w = w;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector4(float x, float y, float z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            w = 0f;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector4(float x, float y)
-        {
-            this.x = x;
-            this.y = y;
-            z = 0f;
-            w = 0f;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(float newX, float newY, float newZ, float newW)
-        {
-            x = newX;
-            y = newY;
-            z = newZ;
-            w = newW;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Lerp(Vector4 a, Vector4 b, float t)
-            => UVector4.Lerp((UVector4)a, (UVector4)b, t);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Lerp(in Vector4 a, in Vector4 b, float t)
-            => UVector4.Lerp((UVector4)a, (UVector4)b, t);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 LerpUnclamped(Vector4 a, Vector4 b, float t)
-            => UVector4.LerpUnclamped((UVector4)a, (UVector4)b, t);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 LerpUnclamped(in Vector4 a, in Vector4 b, float t)
-            => UVector4.LerpUnclamped((UVector4)a, (UVector4)b, t);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 MoveTowards(
-            Vector4 current,
-            Vector4 target,
-            float maxDistanceDelta)
-            => UVector4.MoveTowards(
-                (UVector4)current,
-                (UVector4)target,
-                maxDistanceDelta);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 MoveTowards(
-            in Vector4 current,
-            in Vector4 target,
-            float maxDistanceDelta)
-            => UVector4.MoveTowards(
-                (UVector4)current,
-                (UVector4)target,
-                maxDistanceDelta);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Scale(Vector4 a, Vector4 b)
-            => UVector4.Scale((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Scale(in Vector4 a, in Vector4 b)
-            => UVector4.Scale((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Scale(Vector4 scale)
-        {
-            UVector4 value = this;
-            value.Scale((UVector4)scale);
-            this = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Scale(in Vector4 scale)
-        {
-            UVector4 value = this;
-            value.Scale((UVector4)scale);
-            this = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Normalize(Vector4 a)
-            => UVector4.Normalize((UVector4)a);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Normalize(in Vector4 a)
-            => UVector4.Normalize((UVector4)a);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Normalize()
-            => this = UVector4.Normalize((UVector4)this);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Dot(Vector4 a, Vector4 b)
-            => UVector4.Dot((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Dot(in Vector4 a, in Vector4 b)
-            => UVector4.Dot((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Project(Vector4 a, Vector4 b)
-            => UVector4.Project((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Project(in Vector4 a, in Vector4 b)
-            => UVector4.Project((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Distance(Vector4 a, Vector4 b)
-            => UVector4.Distance((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Distance(in Vector4 a, in Vector4 b)
-            => UVector4.Distance((UVector4)a, (UVector4)b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Magnitude(Vector4 a)
-            => UVector4.Magnitude((UVector4)a);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Magnitude(in Vector4 a)
-            => UVector4.Magnitude((UVector4)a);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float SqrMagnitude(Vector4 a)
-            => UVector4.SqrMagnitude((UVector4)a);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float SqrMagnitude(in Vector4 a)
-            => UVector4.SqrMagnitude((UVector4)a);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly float SqrMagnitude()
-            => ((UVector4)this).sqrMagnitude;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Min(Vector4 lhs, Vector4 rhs)
-            => UVector4.Min((UVector4)lhs, (UVector4)rhs);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Min(in Vector4 lhs, in Vector4 rhs)
-            => UVector4.Min((UVector4)lhs, (UVector4)rhs);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Max(Vector4 lhs, Vector4 rhs)
-            => UVector4.Max((UVector4)lhs, (UVector4)rhs);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Max(in Vector4 lhs, in Vector4 rhs)
-            => UVector4.Max((UVector4)lhs, (UVector4)rhs);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly int GetHashCode()
-            => ((UVector4)this).GetHashCode();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly bool Equals(object obj)
-            => obj is Vector4 other && Equals(other);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(Vector4 other)
-            => ((UVector4)this).Equals((UVector4)other);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(in Vector4 other)
-            => ((UVector4)this).Equals((UVector4)other);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly string ToString()
-            => ((UVector4)this).ToString();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly string ToString(string format)
-            => ((UVector4)this).ToString(format);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly string ToString(
-            string format,
-            IFormatProvider formatProvider)
-            => ((UVector4)this).ToString(format, formatProvider);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator +(Vector4 a, Vector4 b)
-            => (UVector4)a + (UVector4)b;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator -(Vector4 a, Vector4 b)
-            => (UVector4)a - (UVector4)b;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator -(Vector4 a)
-            => -(UVector4)a;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator *(Vector4 a, float d)
-            => (UVector4)a * d;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator *(float d, Vector4 a)
-            => d * (UVector4)a;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator /(Vector4 a, float d)
-            => (UVector4)a / d;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Vector4 lhs, Vector4 rhs)
-            => (UVector4)lhs == (UVector4)rhs;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Vector4 lhs, Vector4 rhs)
-            => (UVector4)lhs != (UVector4)rhs;
-
-        /// <summary>
-        /// Foundation の Vector3 / Vector4 間の変換。
-        /// UnityEngine.Vector3 / Vector4 と同じ変換方向を提供する。
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Vector4(Vector3 value)
-            => new(value.x, value.y, value.z, 0f);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Vector3(Vector4 value)
-            => new(value.x, value.y, value.z);
-
-        /// <summary>
-        /// Foundation の Vector2 / Vector4 間の変換。
-        /// UnityEngine.Vector2 / Vector4 と同じ変換方向を提供する。
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Vector4(Vector2 value)
-            => new(value.x, value.y, 0f, 0f);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Vector2(Vector4 value)
-            => new(value.x, value.y);
-
-        /// <summary>
-        /// Unity 境界との相互変換。
-        /// Domain / Application 側では UnityEngine.Vector4 を直接記述する必要がない。
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UVector4(Vector4 value)
-            => new(value.x, value.y, value.z, value.w);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Vector4(UVector4 value)
-            => new(value.x, value.y, value.z, value.w);
+        public readonly float magnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => (float)Math.Sqrt((double)x*x+(double)y*y+(double)z*z+(double)w*w); }
+        public readonly float sqrMagnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => x*x+y*y+z*z+w*w; }
+        public readonly Vector4 normalized { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Normalize(this); }
+        public static Vector4 zero { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Vector4(0,0,0,0); }
+        public static Vector4 one { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Vector4(1,1,1,1); }
+        public static Vector4 positiveInfinity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Vector4(float.PositiveInfinity,float.PositiveInfinity,float.PositiveInfinity,float.PositiveInfinity); }
+        public static Vector4 negativeInfinity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Vector4(float.NegativeInfinity,float.NegativeInfinity,float.NegativeInfinity,float.NegativeInfinity); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Vector4(float x,float y,float z,float w){this.x=x;this.y=y;this.z=z;this.w=w;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Vector4(float x,float y,float z){this.x=x;this.y=y;this.z=z;w=0;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Vector4(float x,float y){this.x=x;this.y=y;z=0;w=0;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Set(float newX,float newY,float newZ,float newW){x=newX;y=newY;z=newZ;w=newW;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Lerp(Vector4 a,Vector4 b,float t)=>LerpUnclamped(a,b,Mathf.Clamp01(t));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Lerp(in Vector4 a,in Vector4 b,float t)=>LerpUnclamped(a,b,Mathf.Clamp01(t));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 LerpUnclamped(Vector4 a,Vector4 b,float t)=>new Vector4(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,a.z+(b.z-a.z)*t,a.w+(b.w-a.w)*t);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 LerpUnclamped(in Vector4 a,in Vector4 b,float t)=>new Vector4(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,a.z+(b.z-a.z)*t,a.w+(b.w-a.w)*t);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 MoveTowards(Vector4 current,Vector4 target,float maxDistanceDelta)=>MoveTowards(in current,in target,maxDistanceDelta);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 MoveTowards(in Vector4 current,in Vector4 target,float maxDistanceDelta){Vector4 d=target-current;float sq=d.sqrMagnitude;if(sq==0f||(maxDistanceDelta>=0f&&sq<=maxDistanceDelta*maxDistanceDelta))return target;float m=(float)Math.Sqrt(sq);return current+d/m*maxDistanceDelta;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Scale(Vector4 a,Vector4 b)=>new Vector4(a.x*b.x,a.y*b.y,a.z*b.z,a.w*b.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Scale(in Vector4 a,in Vector4 b)=>new Vector4(a.x*b.x,a.y*b.y,a.z*b.z,a.w*b.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Scale(Vector4 s){x*=s.x;y*=s.y;z*=s.z;w*=s.w;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Scale(in Vector4 s){x*=s.x;y*=s.y;z*=s.z;w*=s.w;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Normalize(Vector4 a)=>Normalize(in a);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Normalize(in Vector4 a){float m=a.magnitude;return m>kEpsilon?a/m:zero;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Normalize(){float m=magnitude;if(m>kEpsilon){x/=m;y/=m;z/=m;w/=m;}else this=zero;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float Dot(Vector4 a,Vector4 b)=>a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float Dot(in Vector4 a,in Vector4 b)=>a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Project(Vector4 a,Vector4 b)=>Project(in a,in b);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Project(in Vector4 a,in Vector4 b){float d=Dot(b,b);return d<Mathf.Epsilon?zero:b*(Dot(a,b)/d);}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float Distance(Vector4 a,Vector4 b)=>(a-b).magnitude;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float Distance(in Vector4 a,in Vector4 b){return (a-b).magnitude;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float Magnitude(Vector4 a)=>a.magnitude;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float Magnitude(in Vector4 a)=>a.magnitude;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float SqrMagnitude(Vector4 a)=>a.sqrMagnitude;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float SqrMagnitude(in Vector4 a)=>a.sqrMagnitude;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly float SqrMagnitude()=>sqrMagnitude;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Min(Vector4 lhs,Vector4 rhs)=>new Vector4(Mathf.Min(lhs.x,rhs.x),Mathf.Min(lhs.y,rhs.y),Mathf.Min(lhs.z,rhs.z),Mathf.Min(lhs.w,rhs.w));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Min(in Vector4 lhs,in Vector4 rhs)=>Min(lhs,rhs);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Max(Vector4 lhs,Vector4 rhs)=>new Vector4(Mathf.Max(lhs.x,rhs.x),Mathf.Max(lhs.y,rhs.y),Mathf.Max(lhs.z,rhs.z),Mathf.Max(lhs.w,rhs.w));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 Max(in Vector4 lhs,in Vector4 rhs)=>Max(lhs,rhs);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public override readonly int GetHashCode()=>x.GetHashCode()^y.GetHashCode()<<2^z.GetHashCode()>>2^w.GetHashCode()>>1;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public override readonly bool Equals(object obj)=>obj is Vector4 other&&Equals(other);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly bool Equals(Vector4 other)=>x.Equals(other.x)&&y.Equals(other.y)&&z.Equals(other.z)&&w.Equals(other.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly bool Equals(in Vector4 other)=>x.Equals(other.x)&&y.Equals(other.y)&&z.Equals(other.z)&&w.Equals(other.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public override readonly string ToString()=>ToString(null,null);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly string ToString(string format)=>ToString(format,null);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly string ToString(string format,IFormatProvider provider){if(string.IsNullOrEmpty(format))format="F2";if(provider==null)provider=CultureInfo.InvariantCulture.NumberFormat;return $"({x.ToString(format,provider)}, {y.ToString(format,provider)}, {z.ToString(format,provider)}, {w.ToString(format,provider)})";}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 operator +(Vector4 a,Vector4 b)=>new Vector4(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 operator -(Vector4 a,Vector4 b)=>new Vector4(a.x-b.x,a.y-b.y,a.z-b.z,a.w-b.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 operator -(Vector4 a)=>new Vector4(-a.x,-a.y,-a.z,-a.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 operator *(Vector4 a,float d)=>new Vector4(a.x*d,a.y*d,a.z*d,a.w*d);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 operator *(float d,Vector4 a)=>a*d;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Vector4 operator /(Vector4 a,float d)=>new Vector4(a.x/d,a.y/d,a.z/d,a.w/d);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool operator ==(Vector4 lhs,Vector4 rhs){float a=lhs.x-rhs.x,b=lhs.y-rhs.y,c=lhs.z-rhs.z,d=lhs.w-rhs.w;return a*a+b*b+c*c+d*d<9.99999944E-11f;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool operator !=(Vector4 lhs,Vector4 rhs)=>!(lhs==rhs);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator Vector4(Vector3 v)=>new Vector4(v.x,v.y,v.z,0f);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator Vector3(Vector4 v)=>new Vector3(v.x,v.y,v.z);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator Vector4(Vector2 v)=>new Vector4(v.x,v.y,0f,0f);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator Vector2(Vector4 v)=>new Vector2(v.x,v.y);
+#if UNITY_5_3_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator UnityEngine.Vector4(Vector4 v)=>new UnityEngine.Vector4(v.x,v.y,v.z,v.w);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator Vector4(UnityEngine.Vector4 v)=>new Vector4(v.x,v.y,v.z,v.w);
+#endif
     }
 }

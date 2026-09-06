@@ -1,75 +1,20 @@
 using System;
-using System.Runtime.CompilerServices;
-using URay = UnityEngine.Ray;
-using UVector3 = UnityEngine.Vector3;
+using System.Globalization;
 
+using System.Runtime.CompilerServices;
 namespace CleanFoundation.Geometry
 {
-    /// <summary>
-    /// UnityEngine.Ray の薄い Facade。
-    /// 公開面は Unity の Ray に近づけ、計算処理は UnityEngine.Ray に委譲する。
-    /// </summary>
     [Serializable]
     public struct Ray : IFormattable
     {
-        private URay _value;
-
-        public Vector3 origin
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            readonly get => _value.origin;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _value.origin = value;
-        }
-
-        public Vector3 direction
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            readonly get => _value.direction;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _value.direction = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Ray(Vector3 origin, Vector3 direction)
-        {
-            _value = new URay(
-                (UVector3)origin,
-                (UVector3)direction);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Ray(URay value)
-        {
-            _value = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly Vector3 GetPoint(float distance)
-            => _value.GetPoint(distance);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly string ToString()
-            => _value.ToString();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly string ToString(string format)
-            => _value.ToString(format);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly string ToString(
-            string format,
-            IFormatProvider formatProvider)
-            => _value.ToString(format, formatProvider);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator URay(Ray value)
-            => value._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Ray(URay value)
-            => new(value);
+        private Vector3 m_Origin,m_Direction;
+        public Vector3 origin{[MethodImpl(MethodImplOptions.AggressiveInlining)] readonly get=>m_Origin;[MethodImpl(MethodImplOptions.AggressiveInlining)] set=>m_Origin=value;} public Vector3 direction{[MethodImpl(MethodImplOptions.AggressiveInlining)] readonly get=>m_Direction;[MethodImpl(MethodImplOptions.AggressiveInlining)] set=>m_Direction=value.normalized;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Ray(Vector3 origin,Vector3 direction){m_Origin=origin;m_Direction=direction.normalized;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly Vector3 GetPoint(float distance)=>m_Origin+m_Direction*distance;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public override readonly string ToString()=>ToString(null,null); [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly string ToString(string format)=>ToString(format,null); [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly string ToString(string format,IFormatProvider provider){if(string.IsNullOrEmpty(format))format="F2";if(provider==null)provider=CultureInfo.InvariantCulture.NumberFormat;return $"Origin: {m_Origin.ToString(format,provider)}, Dir: {m_Direction.ToString(format,provider)}";}
+#if UNITY_5_3_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator UnityEngine.Ray(Ray v)=>new UnityEngine.Ray(v.m_Origin,v.m_Direction);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static implicit operator Ray(UnityEngine.Ray v)=>new Ray(v.origin,v.direction);
+#endif
     }
 }
